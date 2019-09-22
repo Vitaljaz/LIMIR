@@ -29,6 +29,23 @@ public:
 		obj.save(this);
 	}
 
+	template<class A>
+	void saveField(A& obj, const char* name)
+	{
+		XMLError eResult = doc.LoadFile(filename);
+		XMLCheckResult(eResult);
+		XMLNode *pRoot = doc.FirstChild();
+
+		XMLElement * pElement = doc.NewElement(name);
+		pRoot->InsertEndChild(pElement);
+
+		
+
+		pRoot->InsertEndChild(pElement);
+
+		doc.SaveFile(filename);
+	}
+
 	void saveField(const int& x, const char* name);
 	void saveField(const double& x, const char* name);
 	void saveField(const float& x, const char* name);

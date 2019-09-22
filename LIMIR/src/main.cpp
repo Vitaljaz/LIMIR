@@ -1,6 +1,20 @@
 #include <iostream>
 #include "limir.h"
 
+
+class Test
+{
+	int x = 10;
+	
+public:
+	friend class LiMir;
+	template<class T>
+	void save(T* t_obj)
+	{
+		SAVE(x);
+	}
+};
+
 class Example
 {
 private:
@@ -9,13 +23,14 @@ private:
 	char d;
 	float s;
 	std::vector <int> vec = { 1,2,3,4,5 };
+	Test t;
 
 public:
 	Example() : x(10), y(11), z(0.2), d('f'), s(0.5f) {}
 
 	friend class LiMir;
 	template<class T>
-	void save(T *t_obj)
+	void save(T* t_obj)
 	{
 		SAVE(x);
 		SAVE(y);
@@ -23,6 +38,7 @@ public:
 		SAVE(s);
 		SAVE(z);
 		SAVE(vec);
+		SAVE(t);
 	}
 };
 
