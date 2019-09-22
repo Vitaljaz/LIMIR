@@ -13,6 +13,8 @@ class LiMir
 {
 private:
 	XMLDocument doc;
+	XMLElement* parent;
+	bool isChild = false;
 	const char* filename;
 
 	void createNewFile();
@@ -29,27 +31,99 @@ public:
 		obj.save(this);
 	}
 
-	template<class A>
-	void saveField(A& obj, const char* name)
+	template<class T>
+	void saveField(T& obj, const char* name)
 	{
+		std::cout << "FIELD: " << name;
 		XMLError eResult = doc.LoadFile(filename);
 		XMLCheckResult(eResult);
 		XMLNode *pRoot = doc.FirstChild();
 
 		XMLElement * pElement = doc.NewElement(name);
+		pElement->SetAttribute("Object", 0);
 		pRoot->InsertEndChild(pElement);
+		doc.SaveFile(filename);
 
-		
+		isChild = true;
 
+		obj.save(this);
+
+		isChild = false;
+		std::cout << "doshel";
+	}
+
+	template <>
+	void saveField<int>(int& x, const char* name)
+	{
+		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
+		XMLError eResult = doc.LoadFile(filename);
+		XMLCheckResult(eResult);
+
+		XMLElement * pElement = doc.NewElement(name);
+		pElement->SetText(x);
+
+
+		// need fix
+		if (isChild)
+		{
+			XMLNode *pRoot = doc.FirstChildElement();
+			XMLElement* old = pRoot->FirstChildElement();
+			old->InsertEndChild(pElement);
+		}
+		else
+		{
+			XMLNode *pRoot = doc.FirstChild();
+			pRoot->InsertEndChild(pElement);
+		}
+
+		doc.SaveFile(filename);
+	}
+
+	template <>
+	void saveField<double>(double& x, const char* name)
+	{
+		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
+		XMLError eResult = doc.LoadFile(filename);
+		XMLCheckResult(eResult);
+		XMLNode* pRoot = doc.FirstChild();
+
+		XMLElement* pElement = doc.NewElement(name);
+		pElement->SetText(x);
 		pRoot->InsertEndChild(pElement);
 
 		doc.SaveFile(filename);
 	}
 
-	void saveField(const int& x, const char* name);
-	void saveField(const double& x, const char* name);
-	void saveField(const float& x, const char* name);
-	void saveField(const char& x, const char* name);
+	template <>
+	void saveField<float>(float& x, const char* name)
+	{
+		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
+		XMLError eResult = doc.LoadFile(filename);
+		XMLCheckResult(eResult);
+		XMLNode* pRoot = doc.FirstChild();
+
+		XMLElement* pElement = doc.NewElement(name);
+		pElement->SetText(x);
+		pRoot->InsertEndChild(pElement);
+
+		doc.SaveFile(filename);
+	}
+
+	template <>
+	void saveField<char>(char& x, const char* name)
+	{
+		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
+		XMLError eResult = doc.LoadFile(filename);
+		XMLCheckResult(eResult);
+		XMLNode* pRoot = doc.FirstChild();
+
+		XMLElement* pElement = doc.NewElement(name);
+		pElement->SetText(x);
+		pRoot->InsertEndChild(pElement);
+
+		doc.SaveFile(filename);
+	}
+
 	void saveField(std::vector<int> v, const char* name);
 
 

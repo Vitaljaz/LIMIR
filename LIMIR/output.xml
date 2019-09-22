@@ -1,9 +1,10 @@
 <Object>
-    <x/>
-    <y/>
-    <d/>
-    <s/>
-    <z/>
+    <x>10        <x>10</x>
+    </x>
+    <y>11</y>
+    <d>102</d>
+    <s>0.5</s>
+    <z>0.20000000000000001</z>
     <vec itemCount="5">
         <Item>1</Item>
         <Item>2</Item>
@@ -11,5 +12,5 @@
         <Item>4</Item>
         <Item>5</Item>
     </vec>
-    <t/>
+    <t Object="0"/>
 </Object>
