@@ -5,13 +5,20 @@
 class Test
 {
 	int x = 10;
+	double d = 4.444;
+	char ch = 'a';
+	std::vector<int> vec = { 1,2,3,4,5 };
 	
 public:
 	friend class LiMir;
+
 	template<class T>
 	void save(T* t_obj)
 	{
 		SAVE(x);
+		SAVE(d);
+		SAVE(ch);
+		SAVE(vec);
 	}
 };
 
@@ -36,9 +43,9 @@ public:
 		SAVE(y);
 		SAVE(d);
 		SAVE(s);
-		SAVE(z);
 		SAVE(vec);
 		SAVE(t);
+		SAVE(z);
 	}
 };
 

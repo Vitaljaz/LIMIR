@@ -18,6 +18,8 @@ private:
 	const char* filename;
 
 	void createNewFile();
+	void openFile();
+	void saveFile();
 
 public:
 	LiMir() = delete;
@@ -28,104 +30,101 @@ public:
 	void serialize(T& obj)
 	{
 		createNewFile();
+		openFile();
 		obj.save(this);
+		saveFile();
 	}
 
 	template<class T>
 	void saveField(T& obj, const char* name)
 	{
-		std::cout << "FIELD: " << name;
-		XMLError eResult = doc.LoadFile(filename);
-		XMLCheckResult(eResult);
-		XMLNode *pRoot = doc.FirstChild();
+		XMLNode* pRoot = doc.FirstChild();
 
-		XMLElement * pElement = doc.NewElement(name);
-		pElement->SetAttribute("Object", 0);
-		pRoot->InsertEndChild(pElement);
-		doc.SaveFile(filename);
+		XMLElement* pObject = doc.NewElement(name);
+		pObject->SetAttribute("Object", 0);
+		pRoot->InsertEndChild(pObject);
 
 		isChild = true;
-
+		parent = pObject;
 		obj.save(this);
-
+		pObject->SetAttribute("class_id", 1);
+		pRoot->InsertEndChild(pObject);
 		isChild = false;
-		std::cout << "doshel";
 	}
 
 	template <>
 	void saveField<int>(int& x, const char* name)
 	{
 		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
-		XMLError eResult = doc.LoadFile(filename);
-		XMLCheckResult(eResult);
-
-		XMLElement * pElement = doc.NewElement(name);
+		XMLElement* pElement = doc.NewElement(name);
 		pElement->SetText(x);
 
-
-		// need fix
 		if (isChild)
 		{
-			XMLNode *pRoot = doc.FirstChildElement();
-			XMLElement* old = pRoot->FirstChildElement();
-			old->InsertEndChild(pElement);
+			parent->InsertEndChild(pElement);
 		}
 		else
 		{
 			XMLNode *pRoot = doc.FirstChild();
 			pRoot->InsertEndChild(pElement);
 		}
-
-		doc.SaveFile(filename);
 	}
 
 	template <>
 	void saveField<double>(double& x, const char* name)
 	{
 		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
-		XMLError eResult = doc.LoadFile(filename);
-		XMLCheckResult(eResult);
-		XMLNode* pRoot = doc.FirstChild();
-
 		XMLElement* pElement = doc.NewElement(name);
 		pElement->SetText(x);
-		pRoot->InsertEndChild(pElement);
 
-		doc.SaveFile(filename);
+		if (isChild)
+		{
+			parent->InsertEndChild(pElement);
+		}
+		else
+		{
+			XMLNode *pRoot = doc.FirstChild();
+			pRoot->InsertEndChild(pElement);
+		}
 	}
 
 	template <>
 	void saveField<float>(float& x, const char* name)
 	{
 		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
-		XMLError eResult = doc.LoadFile(filename);
-		XMLCheckResult(eResult);
-		XMLNode* pRoot = doc.FirstChild();
-
 		XMLElement* pElement = doc.NewElement(name);
 		pElement->SetText(x);
-		pRoot->InsertEndChild(pElement);
 
-		doc.SaveFile(filename);
+		if (isChild)
+		{
+			parent->InsertEndChild(pElement);
+		}
+		else
+		{
+			XMLNode *pRoot = doc.FirstChild();
+			pRoot->InsertEndChild(pElement);
+		}
 	}
 
 	template <>
 	void saveField<char>(char& x, const char* name)
 	{
 		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
-		XMLError eResult = doc.LoadFile(filename);
-		XMLCheckResult(eResult);
-		XMLNode* pRoot = doc.FirstChild();
-
 		XMLElement* pElement = doc.NewElement(name);
 		pElement->SetText(x);
-		pRoot->InsertEndChild(pElement);
 
-		doc.SaveFile(filename);
+		if (isChild)
+		{
+			parent->InsertEndChild(pElement);
+		}
+		else
+		{
+			XMLNode *pRoot = doc.FirstChild();
+			pRoot->InsertEndChild(pElement);
+		}
 	}
 
 	void saveField(std::vector<int> v, const char* name);
 
-
-	~LiMir() {}
+	~LiMir() = default;
 };
