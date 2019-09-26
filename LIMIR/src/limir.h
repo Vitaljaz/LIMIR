@@ -5,6 +5,12 @@
 #include "../tinyXML/tinyxml2.h"
 
 #define SAVE(x) t_obj->saveField((x), #x)
+#define SAVE_OBJ(x) t_obj->saveObject((x), #x)
+#define SAVE_PTR(x) t_obj->savePointer((x), #x)
+
+#define LOAD(x) t_obj->loadField((x), #x)
+#define LOAD_PTR(x) t_obj->loadPointer((x), #x)
+
 #define XMLCheckResult(a_eResult) if (a_eResult != XML_SUCCESS) { printf("Error: %i\n", a_eResult);}
 
 using namespace tinyxml2;
@@ -21,12 +27,14 @@ private:
 	void openFile();
 	void saveFile();
 
+	XMLElement* findByName(const char* name);
+
 public:
 	LiMir() = delete;
 
 	LiMir(const char* t_filename) : filename(t_filename) {}
 
-	template<class T>
+	template <class T>
 	void serialize(T& obj)
 	{
 		createNewFile();
@@ -35,8 +43,16 @@ public:
 		saveFile();
 	}
 
-	template<class T>
-	void saveField(T& obj, const char* name)
+	template <class T>
+	void deserialize(T& obj)
+	{
+		openFile();
+		obj.load(this);
+		saveFile();
+	}
+
+	template <class T>
+	void saveObject(T& obj, const char* name)
 	{
 		XMLNode* pRoot = doc.FirstChild();
 
@@ -52,79 +68,17 @@ public:
 		isChild = false;
 	}
 
-	template <>
-	void saveField<int>(int& x, const char* name)
-	{
-		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
-		XMLElement* pElement = doc.NewElement(name);
-		pElement->SetText(x);
+	void saveField(int& x, const char* name);
+	void saveField(double& x, const char* name);
+	void saveField(float& x, const char* name);
+	void saveField(std::vector<int>& v, const char* name);
+	void savePointer(int*& x, const char* name);
 
-		if (isChild)
-		{
-			parent->InsertEndChild(pElement);
-		}
-		else
-		{
-			XMLNode *pRoot = doc.FirstChild();
-			pRoot->InsertEndChild(pElement);
-		}
-	}
-
-	template <>
-	void saveField<double>(double& x, const char* name)
-	{
-		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
-		XMLElement* pElement = doc.NewElement(name);
-		pElement->SetText(x);
-
-		if (isChild)
-		{
-			parent->InsertEndChild(pElement);
-		}
-		else
-		{
-			XMLNode *pRoot = doc.FirstChild();
-			pRoot->InsertEndChild(pElement);
-		}
-	}
-
-	template <>
-	void saveField<float>(float& x, const char* name)
-	{
-		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
-		XMLElement* pElement = doc.NewElement(name);
-		pElement->SetText(x);
-
-		if (isChild)
-		{
-			parent->InsertEndChild(pElement);
-		}
-		else
-		{
-			XMLNode *pRoot = doc.FirstChild();
-			pRoot->InsertEndChild(pElement);
-		}
-	}
-
-	template <>
-	void saveField<char>(char& x, const char* name)
-	{
-		std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;
-		XMLElement* pElement = doc.NewElement(name);
-		pElement->SetText(x);
-
-		if (isChild)
-		{
-			parent->InsertEndChild(pElement);
-		}
-		else
-		{
-			XMLNode *pRoot = doc.FirstChild();
-			pRoot->InsertEndChild(pElement);
-		}
-	}
-
-	void saveField(std::vector<int> v, const char* name);
+	void loadField(int& x, const char* name);
+	void loadField(double& x, const char* name);
+	void loadField(float& x, const char* name);
+	void loadField(std::vector<int>& v, const char* name);
+	void loadPointer(int*& x, const char* name);
 
 	~LiMir() = default;
 };

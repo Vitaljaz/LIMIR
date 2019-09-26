@@ -1,51 +1,67 @@
 #include <iostream>
 #include "limir.h"
 
-
-class Test
-{
-	int x = 10;
-	double d = 4.444;
-	char ch = 'a';
-	std::vector<int> vec = { 1,2,3,4,5 };
-	
-public:
-	friend class LiMir;
-
-	template<class T>
-	void save(T* t_obj)
-	{
-		SAVE(x);
-		SAVE(d);
-		SAVE(ch);
-		SAVE(vec);
-	}
-};
-
 class Example
 {
 private:
-	int x, y;
-	double z;
-	char d;
-	float s;
-	std::vector <int> vec = { 1,2,3,4,5 };
-	Test t;
+	int x = 10;
+	double d = 14.43;
+	float f = 15.22f;
+	int* p = &x;
+
+	std::vector<int> vec = { 1, 2, 3, 4, 5 };
 
 public:
-	Example() : x(10), y(11), z(0.2), d('f'), s(0.5f) {}
-
 	friend class LiMir;
+
 	template<class T>
 	void save(T* t_obj)
 	{
 		SAVE(x);
-		SAVE(y);
 		SAVE(d);
-		SAVE(s);
+		SAVE(f);
 		SAVE(vec);
-		SAVE(t);
-		SAVE(z);
+		SAVE_PTR(p);
+	}
+
+	template <class T>
+	void load(T* t_obj)
+	{
+		LOAD(x);
+		LOAD(d);
+		LOAD(f);
+		LOAD(vec);
+		LOAD_PTR(p);
+	}
+
+	void clearFields()
+	{
+		x = 0;
+		d = 0;
+		f = 0;
+		vec.clear();
+	}
+
+	void printFields()
+	{
+		std::cout << "x: " << x << std::endl;
+		std::cout << "d: " << d << std::endl;
+		std::cout << "f: " << f << std::endl;
+		std::cout << "*P: " << *p << std::endl;
+		
+		std::cout << "Vector: ";
+		for (auto& i : vec)
+		{
+			std::cout << i << " ";
+		}
+		
+		std::cout << "\n";
+	}
+
+	void testPointer()
+	{
+		x = 11;
+		std::cout << "x: " << x << " *p: " << *p << std::endl;
 	}
 };
 
@@ -54,5 +70,13 @@ int main()
 	Example e;
 	LiMir object("output.xml");
 	object.serialize(e);
+	e.clearFields();
+	e.printFields();
+
+	object.deserialize(e);
+	e.printFields();
+	e.testPointer();
+
+
 	std::cin.get();
 }
