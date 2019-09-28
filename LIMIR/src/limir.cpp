@@ -39,6 +39,14 @@ XMLElement * LiMir::findByName(const char * name)
 	return pElement;
 }
 
+void LiMir::masterIntPointer(int *& x, const char * name)
+{
+	if (liMirMode == SAVE_MODE)
+		savePointer(x, name);
+	else
+		loadPointer(x, name);
+}
+
 void LiMir::saveField(int & x, const char * name)
 {
 	std::cout << "[LOG]: Request save field: " << name << " " << x << std::endl;

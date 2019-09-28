@@ -1,6 +1,14 @@
 #include <iostream>
 #include "limir.h"
 
+class Beta
+{
+public:
+	int a;
+	Beta() = default;
+};
+
+
 class Example
 {
 private:
@@ -8,6 +16,8 @@ private:
 	double d = 14.43;
 	float f = 15.22f;
 	int* p = &x;
+	Beta b;
+	Beta *bp;
 
 	std::vector<int> vec = { 1, 2, 3, 4, 5 };
 
@@ -15,23 +25,14 @@ public:
 	friend class LiMir;
 
 	template<class T>
-	void save(T* t_obj)
+	void master(T* t_obj)
 	{
-		SAVE(x);
-		SAVE(d);
-		SAVE(f);
-		SAVE(vec);
-		SAVE_PTR(p);
-	}
-
-	template <class T>
-	void load(T* t_obj)
-	{
-		LOAD(x);
-		LOAD(d);
-		LOAD(f);
-		LOAD(vec);
-		LOAD_PTR(p);
+		MASTER(x);
+		MASTER(d);
+		MASTER(f);
+		MASTER(vec);
+		MASTER_INT_PTR(p);
+		MASTER_OBJ(b);
 	}
 
 	void clearFields()
