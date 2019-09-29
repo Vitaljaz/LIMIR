@@ -8,6 +8,9 @@ public:
 	Beta() = default;
 };
 
+class A {
+};
+
 
 class Example
 {
@@ -18,6 +21,8 @@ private:
 	int* p = &x;
 	Beta b;
 	Beta *bp;
+	A a;
+	A& z = a;
 
 	std::vector<int> vec = { 1, 2, 3, 4, 5 };
 
@@ -33,6 +38,9 @@ public:
 		MASTER(vec);
 		MASTER_INT_PTR(p);
 		MASTER_OBJ(b);
+		MASTER_OBJ(a);
+		MASTER_OBJ_PTR(bp);
+		MASTER_OBJ_REF(z);
 	}
 
 	void clearFields()
@@ -73,11 +81,6 @@ int main()
 	object.serialize(e);
 	e.clearFields();
 	e.printFields();
-
-	object.deserialize(e);
-	e.printFields();
-	e.testPointer();
-
 
 	std::cin.get();
 }

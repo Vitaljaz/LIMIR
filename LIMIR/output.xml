@@ -10,5 +10,8 @@
         <Item>5</Item>
     </vec>
     <p>10</p>
-    <b class_object="0"/>
+    <b class_object="0" class_id="1"/>
+    <a class_object="0" class_id="2"/>
+    <bp class_object_pointer="0" class_id="3"/>
+    <z class_object_reference="0" class_id="2"/>
 </Object>

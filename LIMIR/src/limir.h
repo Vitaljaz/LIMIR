@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <string>
+#include <typeinfo>
 
 #include "../tinyXML/tinyxml2.h"
 
@@ -14,6 +16,12 @@
 
 using namespace tinyxml2;
 
+struct classInformation
+{
+	std::string className;
+	int uniqID;
+};
+
 class LiMir 
 {
 private:
@@ -24,6 +32,11 @@ private:
 	const int SAVE_MODE = 0;
 	const int LOAD_MODE = 1;
 	int liMirMode = 0;
+
+	std::vector<classInformation> classList;
+
+	int findClassInList(const char* name);
+	int addToClassList(const char* name);
 
 	void createNewFile();
 	void openFile();
@@ -45,8 +58,14 @@ private:
 	template <class T>
 	void saveObject(T& obj, const char* name)
 	{
+		int ID = findClassInList(typeid(obj).name());
+		if (ID == -1)
+		{
+			ID = addToClassList(typeid(obj).name());
+		}
 		XMLElement* pElement = doc.NewElement(name);
 		pElement->SetAttribute("class_object", 0);
+		pElement->SetAttribute("class_id", ID);
 
 		XMLNode *pRoot = doc.FirstChild();
 		pRoot->InsertEndChild(pElement);
@@ -56,28 +75,35 @@ private:
 	template <class T>
 	void saveObjectReference(T& x, const char* name)
 	{
+		int ID = findClassInList(typeid(x).name());
+		if (ID == -1)
+		{
+			ID = addToClassList(typeid(x).name());
+		}
+		XMLElement* pElement = doc.NewElement(name);
+		pElement->SetAttribute("class_object_reference", 0);
+		pElement->SetAttribute("class_id", ID);
 
-	}
-
-	template <class T>
-	void loadObjectReference(T& x, const char* name)
-	{
-
+		XMLNode *pRoot = doc.FirstChild();
+		pRoot->InsertEndChild(pElement);
 	}
 
 	template <class T>
 	void saveObjectPointer(T*& x, const char* name)
 	{
+		//std::cout << typeid(x).name();
+		int ID = findClassInList(typeid(x).name());
+		if (ID == -1)
+		{
+			ID = addToClassList(typeid(x).name());
+		}
+		XMLElement* pElement = doc.NewElement(name);
+		pElement->SetAttribute("class_object_pointer", 0);
+		pElement->SetAttribute("class_id", ID);
 
+		XMLNode *pRoot = doc.FirstChild();
+		pRoot->InsertEndChild(pElement);
 	}
-
-	template <class T>
-	void loadObjectPointer(T*& x, const char* name)
-	{
-
-	}
-
-
 
 public:
 	LiMir() = delete;
@@ -87,6 +113,7 @@ public:
 	template <class T>
 	void serialize(T& obj)
 	{
+		addToClassList(typeid(obj).name());
 		liMirMode = SAVE_MODE;
 		createNewFile();
 		openFile();
@@ -117,16 +144,13 @@ public:
 	{
 		if (liMirMode == SAVE_MODE)
 			saveObject(x, name);
-		// add else
 	}
 
 	template <class T>
 	void masterObjectPointer(T*& x, const char* name)
 	{
-		if (liMirMode == LOAD_MODE)
+		if (liMirMode == SAVE_MODE)
 			saveObjectPointer(x, name);
-		else
-			loadObjectPOinter(x, name);
 	}
 
 	template <class T>
@@ -134,8 +158,6 @@ public:
 	{
 		if (liMirMode == SAVE_MODE)
 			saveObjectReference(x, name);
-		else
-			loadObjectReference(x, name);
 	}
 
 	void masterIntPointer(int*& x, const char* name);

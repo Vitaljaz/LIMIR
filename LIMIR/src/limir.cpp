@@ -1,5 +1,28 @@
 #include "limir.h"
 
+int LiMir::findClassInList(const char * name)
+{
+	for (auto i : classList)
+	{
+		if (i.className == name)
+			return i.uniqID;
+	}
+	return -1;
+}
+
+int LiMir::addToClassList(const char * name)
+{
+	if (findClassInList(name) == -1)
+	{
+		classInformation t;
+		t.className = name;
+		t.uniqID = classList.size();
+		classList.push_back(t);
+		return t.uniqID;
+	}
+	return -1;
+}
+
 void LiMir::createNewFile()
 {
 	std::cout << "[LOG]: Request create new file with name " << filename << std::endl;
