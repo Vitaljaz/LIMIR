@@ -59,13 +59,13 @@ private:
 
 	XMLElement* findByName(const char* name);
 
-	template <class T>
-	void saveObject(T& obj, const char* name)
+	template<class T>
+	void saveObject(T& object, const char* name)
 	{
-		int ID = findClassInList(typeid(obj).name());
+		int ID = findClassInList(typeid(object).name());
 		if (ID == -1)
 		{
-			ID = addToClassList(typeid(obj).name());
+			ID = addToClassList(typeid(object).name());
 		}
 		XMLElement* pElement = doc.NewElement(name);
 		pElement->SetAttribute("class_object", 0);
@@ -77,19 +77,19 @@ private:
 		}
 		else
 		{
-			XMLNode *pRoot = doc.FirstChild();
+			XMLNode* pRoot = doc.FirstChild();
 			pRoot->InsertEndChild(pElement);
 		}
 	}
 
 
-	template <class T>
-	void saveObjectReference(T& x, const char* name)
+	template<class T>
+	void saveObjectReference(T& objectRef, const char* name)
 	{
-		int ID = findClassInList(typeid(x).name());
+		int ID = findClassInList(typeid(objectRef).name());
 		if (ID == -1)
 		{
-			ID = addToClassList(typeid(x).name());
+			ID = addToClassList(typeid(objectRef).name());
 		}
 		XMLElement* pElement = doc.NewElement(name);
 		pElement->SetAttribute("class_object_reference", 0);
@@ -101,18 +101,18 @@ private:
 		}
 		else
 		{
-			XMLNode *pRoot = doc.FirstChild();
+			XMLNode* pRoot = doc.FirstChild();
 			pRoot->InsertEndChild(pElement);
 		}
 	}
 
-	template <class T>
-	void saveObjectPointer(T*& x, const char* name)
+	template<class T>
+	void saveObjectPointer(T*& objectPtr, const char* name)
 	{
-		int ID = findClassInList(typeid(x).name());
+		int ID = findClassInList(typeid(objectPtr).name());
 		if (ID == -1)
 		{
-			ID = addToClassList(typeid(x).name());
+			ID = addToClassList(typeid(objectPtr).name());
 		}
 		XMLElement* pElement = doc.NewElement(name);
 		pElement->SetAttribute("class_object_pointer", 0);
@@ -124,7 +124,7 @@ private:
 		}
 		else
 		{
-			XMLNode *pRoot = doc.FirstChild();
+			XMLNode* pRoot = doc.FirstChild();
 			pRoot->InsertEndChild(pElement);
 		}
 	}
@@ -162,28 +162,28 @@ public:
 
 	LiMir(const char* t_filename) : filename(t_filename) {}
 
-	template <class T>
-	void serialize(T& obj, const char* name)
+	template<class T>
+	void serialize(T& object, const char* name)
 	{
-		addToClassList(typeid(obj).name());
+		addToClassList(typeid(object).name());
 		objectName = name;
 		liMirMode = SAVE_MODE;
 		createNewFile();
 		openFile();
-		obj.master(this);
+		object.master(this);
 		saveFile();
 	}
 
-	template <class T>
-	void deserialize(T& obj)
+	template<class T>
+	void deserialize(T& object)
 	{
 		liMirMode = LOAD_MODE;
 		openFile();
-		obj.master(this);
+		object.master(this);
 		saveFile();
 	}
 
-	template <class T>
+	template<class T>
 	void masterField(T& x, const char* name)
 	{
 		if (liMirMode == SAVE_MODE)
@@ -192,14 +192,14 @@ public:
 			loadField(x, name);
 	}
 
-	template <class T>
-	void masterObject(T& x, const char* name)
+	template<class T>
+	void masterObject(T& object, const char* name)
 	{
 		if (liMirMode == SAVE_MODE)
-			saveObject(x, name);
+			saveObject(object, name);
 	}
 
-	template <class T>
+	template<class T>
 	void masterObjectPointer(T*& objectPtr, const char* name)
 	{
 		if (objectPtr == nullptr)
@@ -210,10 +210,10 @@ public:
 	}
 
 	template <class T>
-	void masterObjectReference(T& x, const char* name)
+	void masterObjectReference(T& objectRef, const char* name)
 	{
 		if (liMirMode == SAVE_MODE)
-			saveObjectReference(x, name);
+			saveObjectReference(objectRef, name);
 	}
 
 	template<class T>
