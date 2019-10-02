@@ -1,17 +1,18 @@
-<Object>
-    <x>10</x>
-    <d>14.43</d>
-    <f>15.22</f>
-    <vec itemCount="5">
-        <Item>1</Item>
-        <Item>2</Item>
-        <Item>3</Item>
-        <Item>4</Item>
-        <Item>5</Item>
-    </vec>
-    <p>10</p>
-    <b class_object="0" class_id="1"/>
-    <a class_object="0" class_id="2"/>
-    <bp class_object_pointer="0" class_id="3"/>
-    <z class_object_reference="0" class_id="2"/>
-</Object>
+<e class_id="0">
+    <B class_id="2">
+        <oo>10</oo>
+    </B>
+    <A class_id="1">
+        <zero>10</zero>
+        <vectors itemCount="6">
+            <Item>1</Item>
+            <Item>2</Item>
+            <Item>3</Item>
+            <Item>4</Item>
+            <Item>4</Item>
+            <Item>4</Item>
+        </vectors>
+        <b>3</b>
+    </A>
+    <x>1</x>
+</e>

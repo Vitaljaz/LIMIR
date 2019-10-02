@@ -1,16 +1,19 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <string>
 #include <typeinfo>
 
 #include "../tinyXML/tinyxml2.h"
 
+#define NAME_OBJECT(x) (#x)
 #define MASTER(x) t_obj->masterField((x), #x)
 #define MASTER_OBJ(x) t_obj->masterObject((x), #x)
 #define MASTER_OBJ_PTR(x) t_obj->masterObjectPointer((x), #x)
 #define MASTER_OBJ_REF(x) t_obj->masterObjectReference((x), #x)
 #define MASTER_INT_PTR(x) t_obj->masterIntPointer((x), #x)
+#define MASTER_BASE_OBJ(x) t_obj->masterBaseObject((dynamic_cast<x *>(this)), #x)
 
 #define XMLCheckResult(a_eResult) if (a_eResult != XML_SUCCESS) { printf("Error: %i\n", a_eResult);}
 
@@ -26,14 +29,15 @@ class LiMir
 {
 private:
 	XMLDocument doc;
-	XMLElement* parent;
-	bool isChild = false;
 	const char* filename;
+	const char* objectName;
 	const int SAVE_MODE = 0;
 	const int LOAD_MODE = 1;
 	int liMirMode = 0;
 
 	std::vector<classInformation> classList;
+	std::vector<const char*> classNames;
+	std::vector<XMLElement*> parents;
 
 	int findClassInList(const char* name);
 	int addToClassList(const char* name);
@@ -67,8 +71,15 @@ private:
 		pElement->SetAttribute("class_object", 0);
 		pElement->SetAttribute("class_id", ID);
 
-		XMLNode *pRoot = doc.FirstChild();
-		pRoot->InsertEndChild(pElement);
+		if (!parents.empty())
+		{
+			parents.back()->InsertEndChild(pElement);
+		}
+		else
+		{
+			XMLNode *pRoot = doc.FirstChild();
+			pRoot->InsertEndChild(pElement);
+		}
 	}
 
 
@@ -84,14 +95,20 @@ private:
 		pElement->SetAttribute("class_object_reference", 0);
 		pElement->SetAttribute("class_id", ID);
 
-		XMLNode *pRoot = doc.FirstChild();
-		pRoot->InsertEndChild(pElement);
+		if (!parents.empty())
+		{
+			parents.back()->InsertEndChild(pElement);
+		}
+		else
+		{
+			XMLNode *pRoot = doc.FirstChild();
+			pRoot->InsertEndChild(pElement);
+		}
 	}
 
 	template <class T>
 	void saveObjectPointer(T*& x, const char* name)
 	{
-		//std::cout << typeid(x).name();
 		int ID = findClassInList(typeid(x).name());
 		if (ID == -1)
 		{
@@ -101,8 +118,43 @@ private:
 		pElement->SetAttribute("class_object_pointer", 0);
 		pElement->SetAttribute("class_id", ID);
 
-		XMLNode *pRoot = doc.FirstChild();
+		if (!parents.empty())
+		{
+			parents.back()->InsertEndChild(pElement);
+		}
+		else
+		{
+			XMLNode *pRoot = doc.FirstChild();
+			pRoot->InsertEndChild(pElement);
+		}
+	}
+
+	template<class T>
+	void saveBaseObject(T* baseObject, const char* name)
+	{
+		int ID = findClassInList(typeid(baseObject).name());
+		if (ID == -1)
+		{
+			ID = addToClassList(typeid(baseObject).name());
+		}
+		XMLNode* pRoot = doc.FirstChild();
+
+		XMLElement* pElement = doc.NewElement(name);
+		pElement->SetAttribute("class_id", ID);
+
+		parents.push_back(pElement);
+		baseObject->master(this);
+		parents.pop_back();
+
 		pRoot->InsertEndChild(pElement);
+	}
+
+	template<class T>
+	void loadBaseObject(T* baseObject, const char* name)
+	{
+		classNames.push_back(name);
+		baseObject->master(this);
+		classNames.pop_back();
 	}
 
 public:
@@ -111,9 +163,10 @@ public:
 	LiMir(const char* t_filename) : filename(t_filename) {}
 
 	template <class T>
-	void serialize(T& obj)
+	void serialize(T& obj, const char* name)
 	{
 		addToClassList(typeid(obj).name());
+		objectName = name;
 		liMirMode = SAVE_MODE;
 		createNewFile();
 		openFile();
@@ -147,10 +200,13 @@ public:
 	}
 
 	template <class T>
-	void masterObjectPointer(T*& x, const char* name)
+	void masterObjectPointer(T*& objectPtr, const char* name)
 	{
+		if (objectPtr == nullptr)
+			return;
+
 		if (liMirMode == SAVE_MODE)
-			saveObjectPointer(x, name);
+			saveObjectPointer(objectPtr, name);
 	}
 
 	template <class T>
@@ -158,6 +214,18 @@ public:
 	{
 		if (liMirMode == SAVE_MODE)
 			saveObjectReference(x, name);
+	}
+
+	template<class T>
+	void masterBaseObject(T* baseObject, const char* name)
+	{
+		if (baseObject == nullptr)
+			return;
+
+		if (liMirMode == SAVE_MODE)
+			saveBaseObject(baseObject, name);
+		else
+			loadBaseObject(baseObject, name);
 	}
 
 	void masterIntPointer(int*& x, const char* name);

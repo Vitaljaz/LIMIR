@@ -1,76 +1,62 @@
 #include <iostream>
 #include "limir.h"
 
-class Beta
+class B
 {
 public:
-	int a;
-	Beta() = default;
-};
+	int oo = 10;
 
-class A {
-};
-
-
-class Example
-{
-private:
-	int x = 10;
-	double d = 14.43;
-	float f = 15.22f;
-	int* p = &x;
-	Beta b;
-	Beta *bp;
-	A a;
-	A& z = a;
-
-	std::vector<int> vec = { 1, 2, 3, 4, 5 };
-
-public:
 	friend class LiMir;
-
 	template<class T>
 	void master(T* t_obj)
 	{
+		MASTER(oo);
+	}
+};
+
+class A: public B {
+public: 
+	int zero = 10;
+	int b = 3;
+	std::vector<int> vectors = { 1,2,3,4,4,4 };
+
+public:
+	friend class LiMir;
+	template<class T>
+	void master(T* t_obj)
+	{
+		MASTER_BASE_OBJ(B);
+		MASTER(zero);
+		MASTER(vectors);
+		MASTER(b);
+	}
+};
+
+
+class Example : public A
+{
+private:
+	int x = 1;
+
+public:
+	friend class LiMir;
+	template<class T>
+	void master(T* t_obj)
+	{
+		MASTER_BASE_OBJ(A);
 		MASTER(x);
-		MASTER(d);
-		MASTER(f);
-		MASTER(vec);
-		MASTER_INT_PTR(p);
-		MASTER_OBJ(b);
-		MASTER_OBJ(a);
-		MASTER_OBJ_PTR(bp);
-		MASTER_OBJ_REF(z);
 	}
 
-	void clearFields()
+	void resetAll()
 	{
 		x = 0;
-		d = 0;
-		f = 0;
-		vec.clear();
+		A::zero = 0;
+		A::b = 0;
 	}
 
-	void printFields()
+	void printAll()
 	{
-		std::cout << "x: " << x << std::endl;
-		std::cout << "d: " << d << std::endl;
-		std::cout << "f: " << f << std::endl;
-		std::cout << "*P: " << *p << std::endl;
-		
-		std::cout << "Vector: ";
-		for (auto& i : vec)
-		{
-			std::cout << i << " ";
-		}
-		
-		std::cout << "\n";
-	}
-
-	void testPointer()
-	{
-		x = 11;
-		std::cout << "x: " << x << " *p: " << *p << std::endl;
+		std::cout << "x: " << x << " zero: " << zero << " b: " << b << std::endl;
 	}
 };
 
@@ -78,9 +64,12 @@ int main()
 {
 	Example e;
 	LiMir object("output.xml");
-	object.serialize(e);
-	e.clearFields();
-	e.printFields();
+	object.serialize(e, NAME_OBJECT(e));
+	e.resetAll();
+	e.printAll();
+
+	object.deserialize(e);
+	e.printAll();
 
 	std::cin.get();
 }
