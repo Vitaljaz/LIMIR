@@ -156,56 +156,56 @@ class LiMir {
   void SaveObjectPointer(T*& object_ptr, const char* name) {
     int id = FindClassInList(typeid(object_ptr).name());
 
-	if (id == -1) {
-	  id = AddToClassList(typeid(object_ptr).name());
-	}
+    if (id == -1) {
+      id = AddToClassList(typeid(object_ptr).name());
+    }
 
-	XMLElement* pElement = doc_.NewElement(name);
-	pElement->SetAttribute("class_object_pointer", 0);
-	pElement->SetAttribute("class_id", id);
+    XMLElement* pElement = doc_.NewElement(name);
+    pElement->SetAttribute("class_object_pointer", 0);
+    pElement->SetAttribute("class_id", id);
 
-	if (!parents_.empty()) {
-	  parents_.back()->InsertEndChild(pElement);
-	} else {
-	  XMLNode* pRoot = doc_.FirstChild(); 
-	  pRoot->InsertEndChild(pElement);
-	}
+    if (!parents_.empty()) {
+      parents_.back()->InsertEndChild(pElement);
+    } else {
+    XMLNode* pRoot = doc_.FirstChild();
+    pRoot->InsertEndChild(pElement);
+    }
   }
 
   template<class T>
   void SaveBaseObject(T* base_object, const char* name) {
     int id = FindClassInList(typeid(base_object).name());
 
-	if (id == -1) {
-	  id = AddToClassList(typeid(base_object).name());
-	}
+    if (id == -1) {
+      id = AddToClassList(typeid(base_object).name());
+    }
 		
-	XMLNode* pRoot = doc_.FirstChild();
-	XMLElement* pElement = doc_.NewElement(name);
-	pElement->SetAttribute("class_id", id);
+    XMLNode* pRoot = doc_.FirstChild();
+    XMLElement* pElement = doc_.NewElement(name);
+    pElement->SetAttribute("class_id", id);
 
-	parents_.push_back(pElement);
-	base_object->Master(this);
-	parents_.pop_back();
-	pRoot->InsertEndChild(pElement);
-	}
+    parents_.push_back(pElement);
+    base_object->Master(this);
+    parents_.pop_back();
+    pRoot->InsertEndChild(pElement);
+  }
 
   template<class T>
   void LoadBaseObject(T* base_object, const char* name) {
     class_names_.push_back(name);
-	base_object->Master(this);
-	class_names_.pop_back();
+    base_object->Master(this);
+    class_names_.pop_back();
   }
 
-	XMLDocument doc_;
-	const char* filename_;
-	const char* object_name_;
-	const int kSaveMode = 0;
-	const int kLoadMode = 1;
-	int limir_mode_ = 0;
-	std::vector<ClassInformation> class_list_;
-	std::vector<const char*> class_names_;
-	std::vector<XMLElement*> parents_;
+  XMLDocument doc_;
+  const char* filename_;
+  const char* object_name_;
+  const int kSaveMode = 0;
+  const int kLoadMode = 1;
+  int limir_mode_ = 0;
+  std::vector<ClassInformation> class_list_;
+  std::vector<const char*> class_names_;
+  std::vector<XMLElement*> parents_;
 };
 
 #endif // LIMIR_SRC_LIMIR_H_
