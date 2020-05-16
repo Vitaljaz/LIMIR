@@ -1,257 +1,203 @@
 #include "limir.h"
 
-int LiMir::findClassInList(const char * name)
-{
-	for (auto i : classList)
-	{
-		if (i.className == name)
-			return i.uniqID;
-	}
-	return -1;
+int LiMir::FindClassInList(const char* name) {
+  for (auto& i : class_list_) {
+	if (i.class_name == name)
+      return i.uniq_id;
+  }
+  return -1;
 }
 
-int LiMir::addToClassList(const char * name)
-{
-	if (findClassInList(name) == -1)
-	{
-		classInformation t;
-		t.className = name;
-		t.uniqID = classList.size();
-		classList.push_back(t);
-		return t.uniqID;
-	}
-	return -1;
+int LiMir::AddToClassList(const char* name) {
+  if (FindClassInList(name) == -1) {
+	ClassInformation t;
+	t.class_name = name;
+	t.uniq_id = class_list_.size();
+	class_list_.push_back(t);
+	return t.uniq_id;
+  }
+  return -1;
 }
 
-void LiMir::createNewFile()
-{
-	XMLElement* pElement = doc.NewElement(objectName);
-	pElement->SetAttribute("class_id", 0);
-	XMLNode* pRoot = pElement;
-	doc.InsertFirstChild(pRoot);
-	XMLError eResult = doc.SaveFile(filename);
-	XMLCheckResult(eResult);
+void LiMir::CreateNewFile() {
+  XMLElement* pElement = doc_.NewElement(object_name_);
+  pElement->SetAttribute("class_id", 0);
+  XMLNode* pRoot = pElement;
+  doc_.InsertFirstChild(pRoot);
+  XMLError eResult = doc_.SaveFile(filename_);
+  XMLCheckResult(eResult);
 }
 
-void LiMir::openFile()
-{
-	XMLError eResult = doc.LoadFile(filename);
-	XMLCheckResult(eResult);
+void LiMir::OpenFile() {
+  XMLError eResult = doc_.LoadFile(filename_);
+  XMLCheckResult(eResult);
 }
 
-void LiMir::saveFile()
-{
-	doc.SaveFile(filename);
+void LiMir::SaveFile() {
+  doc_.SaveFile(filename_);
 }
 
-XMLElement * LiMir::findByName(const char * name)
-{
-	XMLNode* pRoot = doc.FirstChild();
-	if (pRoot == nullptr)
-	{
-		std::cout << "ERROR[NAME]: " << XML_ERROR_FILE_READ_ERROR << std::endl;
-		return nullptr;
-	}
+XMLElement * LiMir::FindByName(const char* name) {
+  XMLNode* pRoot = doc_.FirstChild();
+  if (pRoot == nullptr) {
+    std::cout << "ERROR[NAME]: " << XML_ERROR_FILE_READ_ERROR << std::endl;
+	return nullptr;
+  }
 
-	if (!classNames.empty())
-	{
-		XMLElement* pElement = pRoot->FirstChildElement(classNames.back());
-		XMLElement* pChild = pElement->FirstChildElement(name);
-		if (pChild == nullptr)
-		{
-			std::cout << "ERROR[NAME]: " << XML_ERROR_PARSING_ELEMENT << std::endl;
-			return nullptr;
-
-		}
-		return pChild;
-	}
-	else
-	{
-		XMLElement* pElement = pRoot->FirstChildElement(name);
-		if (pElement == nullptr)
-		{
-			std::cout << "ERROR[NAME]: " << XML_ERROR_PARSING_ELEMENT << std::endl;
-			return nullptr;
-		}
-		return pElement;
+  if (!class_names_.empty()) {
+    XMLElement* pElement = pRoot->FirstChildElement(class_names_.back());
+    XMLElement* pChild = pElement->FirstChildElement(name);
+    if (pChild == nullptr) {
+	  std::cout << "ERROR[NAME]: " << XML_ERROR_PARSING_ELEMENT << std::endl;
+	  return nullptr;
+    }
+	return pChild;
+	} else {
+	  XMLElement* pElement = pRoot->FirstChildElement(name);
+	  if (pElement == nullptr) {
+	    std::cout << "ERROR[NAME]: " << XML_ERROR_PARSING_ELEMENT << std::endl;
+	    return nullptr;
+	  }
+    return pElement;
 	}
 }
 
-void LiMir::masterIntPointer(int *& x, const char * name)
-{
-	if (liMirMode == SAVE_MODE)
-		savePointer(x, name);
-	else
-		loadPointer(x, name);
+void LiMir::MasterIntPointer(int *& x, const char* name) {
+  if (limir_mode_ == kSaveMode)
+	SavePointer(x, name);
+  else
+	LoadPointer(x, name);
 }
 
-void LiMir::saveField(int & x, const char * name)
-{
-	XMLElement* pElement = doc.NewElement(name);
-	pElement->SetText(x);
+void LiMir::SaveField(const int x, const char* name) {
+  XMLElement* pElement = doc_.NewElement(name);
+  pElement->SetText(x);
 
-	if (!parents.empty())
-	{
-		parents.back()->InsertEndChild(pElement);
-	}
-	else
-	{
-		XMLNode *pRoot = doc.FirstChild();
-		pRoot->InsertEndChild(pElement);
-	}
+  if (!parents_.empty()) {
+    parents_.back()->InsertEndChild(pElement);
+  } else {
+    XMLNode *pRoot = doc_.FirstChild();
+    pRoot->InsertEndChild(pElement);
+  }
 }
 
-void LiMir::saveField(double & x, const char * name)
-{
-	XMLElement* pElement = doc.NewElement(name);
-	pElement->SetText(x);
+void LiMir::SaveField(const double x, const char* name) {
+  XMLElement* pElement = doc_.NewElement(name);
+  pElement->SetText(x);
 
-	if (!parents.empty())
-	{
-		parents.back()->InsertEndChild(pElement);
-	}
-	else
-	{
-		XMLNode *pRoot = doc.FirstChild();
-		pRoot->InsertEndChild(pElement);
-	}
+  if (!parents_.empty()) {
+     parents_.back()->InsertEndChild(pElement);
+  } else {
+    XMLNode *pRoot = doc_.FirstChild();
+	pRoot->InsertEndChild(pElement);
+  }
 }
 
-void LiMir::saveField(float & x, const char * name)
-{
-	XMLElement* pElement = doc.NewElement(name);
-	pElement->SetText(x);
+void LiMir::SaveField(const float x, const char* name) {
+  XMLElement* pElement = doc_.NewElement(name);
+  pElement->SetText(x);
 
-	if (!parents.empty())
-	{
-		parents.back()->InsertEndChild(pElement);
-	}
-	else
-	{
-		XMLNode *pRoot = doc.FirstChild();
-		pRoot->InsertEndChild(pElement);
-	}
+  if (!parents_.empty()) {
+	parents_.back()->InsertEndChild(pElement);
+  } else {
+	XMLNode *pRoot = doc_.FirstChild();
+	pRoot->InsertEndChild(pElement);
+  }
 }
 
-void LiMir::savePointer(int *& x, const char * name)
-{
-	XMLElement* pElement = doc.NewElement(name);
-	pElement->SetText(*x);
+void LiMir::SavePointer(int *& x, const char* name) {
+  XMLElement* pElement = doc_.NewElement(name);
+  pElement->SetText(*x);
 
-	if (!parents.empty())
-	{
-		parents.back()->InsertEndChild(pElement);
-	}
-	else
-	{
-		XMLNode *pRoot = doc.FirstChild();
-		pRoot->InsertEndChild(pElement);
-	}
+  if (!parents_.empty()) {
+	parents_.back()->InsertEndChild(pElement);
+  } else {
+    XMLNode *pRoot = doc_.FirstChild();
+    pRoot->InsertEndChild(pElement);
+  }
 }
 
-void LiMir::saveField(std::vector<int>& v, const char* name)
-{
-	XMLElement* pVector = doc.NewElement(name);
-	XMLNode* pRoot = doc.FirstChild();
+void LiMir::SaveField(const std::vector<int>& v, const char* name) {
+  XMLElement* pVector = doc_.NewElement(name);
+  XMLNode* pRoot = doc_.FirstChild();
 
-	if (!parents.empty())
-	{
-		parents.back()->InsertEndChild(pVector);
-	}
-	else
-	{
-		pRoot->InsertEndChild(pVector);
-	}
+  if (!parents_.empty()) {
+	parents_.back()->InsertEndChild(pVector);
+  } else {
+    pRoot->InsertEndChild(pVector);
+  }
 
-	for (const auto & item : v)
-	{
-		XMLElement* pVectorElement = doc.NewElement("Item");
-		pVectorElement->SetText(item);
+  for (const auto& item : v) {
+	XMLElement* pVectorElement = doc_.NewElement("Item");
+	pVectorElement->SetText(item);
+	pVector->InsertEndChild(pVectorElement);
+  }
 
-		pVector->InsertEndChild(pVectorElement);
-	}
+  pVector->SetAttribute("itemCount", v.size());
 
-	pVector->SetAttribute("itemCount", v.size());
-
-	if (!parents.empty())
-	{
-		parents.back()->InsertEndChild(pVector);
-	}
-	else
-	{
-		pRoot->InsertEndChild(pVector);
-	}
+  if (!parents_.empty()) {
+	parents_.back()->InsertEndChild(pVector);
+  } else {
+    pRoot->InsertEndChild(pVector);
+  }
 }
 
-void LiMir::loadField(int& x, const char* name)
-{
-	XMLElement* pElement = findByName(name);
-	if (pElement == nullptr)
-	{
-		std::cout << "ERROR[INT]: " << XML_ERROR_PARSING << std::endl;
-		return;
-	}
-	XMLError eResult = pElement->QueryIntText(&x);
-	XMLCheckResult(eResult);
+void LiMir::LoadField(int& x, const char* name) {
+  XMLElement* pElement = FindByName(name);
+  if (pElement == nullptr) {
+	std::cout << "ERROR[INT]: " << XML_ERROR_PARSING << std::endl;
+	return;
+  }
+  XMLError eResult = pElement->QueryIntText(&x);
+  XMLCheckResult(eResult);
 }
 
-void LiMir::loadField(double & x, const char * name)
-{
-	XMLElement* pElement = findByName(name);
-	if (pElement == nullptr)
-	{
-		std::cout << "ERROR[DOUBLE]: " << XML_ERROR_PARSING << std::endl;
-		return;
-	}
-	XMLError eResult = pElement->QueryDoubleText(&x);
-	XMLCheckResult(eResult);
+void LiMir::LoadField(double& x, const char* name) {
+  XMLElement* pElement = FindByName(name);
+  if (pElement == nullptr) {
+    std::cout << "ERROR[DOUBLE]: " << XML_ERROR_PARSING << std::endl;
+    return;
+  }
+  XMLError eResult = pElement->QueryDoubleText(&x);
+  XMLCheckResult(eResult);
 }
 
-void LiMir::loadField(float & x, const char * name)
-{
-	XMLElement* pElement = findByName(name);
-	if (pElement == nullptr)
-	{
-		std::cout << "ERROR[FLOAT]: " << XML_ERROR_PARSING << std::endl;
-		return;
-	}
-	XMLError eResult = pElement->QueryFloatText(&x);
-	XMLCheckResult(eResult);
+void LiMir::LoadField(float& x, const char* name) {
+  XMLElement* pElement = FindByName(name);
+  if (pElement == nullptr) {
+    std::cout << "ERROR[FLOAT]: " << XML_ERROR_PARSING << std::endl;
+    return;
+  }
+  XMLError eResult = pElement->QueryFloatText(&x);
+  XMLCheckResult(eResult);
 }
 
-void LiMir::loadField(std::vector<int>& v, const char * name)
-{
-	XMLElement* pElement = findByName(name);
-	if (pElement == nullptr)
-	{
-		std::cout << "ERROR[VECTOR]: " << XML_ERROR_PARSING << std::endl;
-		return;
-	}
+void LiMir::LoadField(std::vector<int>& v, const char* name) {
+  XMLElement* pElement = FindByName(name);
+  if (pElement == nullptr) {
+    std::cout << "ERROR[VECTOR]: " << XML_ERROR_PARSING << std::endl;
+    return;
+  }
 
-	XMLElement* pListElement = pElement->FirstChildElement("Item");
-	std::vector<int> vecList;
+  XMLElement* pListElement = pElement->FirstChildElement("Item");
+  std::vector<int> vec_list;
 
-	while (pListElement != nullptr)
-	{
-		int iOutListValue;
-		XMLError eResult = pListElement->QueryIntText(&iOutListValue);
-		XMLCheckResult(eResult);
-
-		vecList.push_back(iOutListValue);
-		pListElement = pListElement->NextSiblingElement("Item");
-	}
-
-	v = vecList;
+  while (pListElement != nullptr) {
+    int out_list_value = 0;
+    XMLError eResult = pListElement->QueryIntText(&out_list_value);
+    XMLCheckResult(eResult);
+    vec_list.push_back(out_list_value);
+    pListElement = pListElement->NextSiblingElement("Item");
+  }
+  v = vec_list;
 }
 
-void LiMir::loadPointer(int *& x, const char * name)
-{
-	XMLElement* pElement = findByName(name);
-	if (pElement == nullptr)
-	{
-		std::cout << "ERROR[INT_PTR]: " << XML_ERROR_PARSING << std::endl;
-		return;
-	}
-	XMLError eResult = pElement->QueryIntText(x);
-	XMLCheckResult(eResult);
+void LiMir::LoadPointer(int *& x, const char* name) {
+  XMLElement* pElement = FindByName(name);
+  if (pElement == nullptr) {
+    std::cout << "ERROR[INT_PTR]: " << XML_ERROR_PARSING << std::endl;
+    return;
+  }
+  XMLError eResult = pElement->QueryIntText(x);
+  XMLCheckResult(eResult);
 }

@@ -1,150 +1,139 @@
 #include <iostream>
 #include "limir.h"
 
-class A
-{
-public:
-	int x = 10;
-	
-	friend class LiMir;
-	template<class T>
-	void master(T* t_obj)
-	{
-		MASTER(x);
-	}
+class A {
+ public:
+  template<class T>
+  void Master(T* obj) {
+     MASTER(x_);
+  }
 
-	virtual void clearFields()
-	{
-		x = 0;
-	}
+  virtual void ClearFields() {
+	x_ = 0;
+  }
 
-	virtual void print()
-	{
-		std::cout << "x: " << x << std::endl;
-	}
+  virtual void Print() {
+	std::cout << "x: " << x_ << std::endl;
+  }
+
+private:
+  friend class LiMir;
+  int x_ = 10;
 };
 
-class B : public virtual A
-{
-public:
-	std::vector<int> vec = { 1, 2, 3, 4, 5 };
-	int a = 5;
-	int* aptr = &a;
+class B : public virtual A {
+ public:
+  template<class T>
+  void Master(T* obj) {
+	MASTER_BASE_OBJ(A);
+	MASTER(vec_);
+	MASTER(a_);
+	MASTER_INT_PTR(aptr_);
+  }
 
-	friend class LiMir;
-	template<class T>
-	void master(T* t_obj)
-	{
-		MASTER_BASE_OBJ(A);
-		MASTER(vec);
-		MASTER(a);
-		MASTER_INT_PTR(aptr);
-	}
+  void ClearFields() override {
+	a_ = 0;
+	vec_.clear();
+  }
 
-	void clearFields() override
-	{
-		a = 0;
-		vec.clear();
-	}
+  void Print() override {
+    printf("a: %d \n", a_);
+	printf("*aptr: %d \n", *aptr_);
+	printf("vector: \n");
 
-	void print() override
-	{
-		std::cout << "a: " << a << std::endl;
-		std::cout << "*aptr: " << *aptr << std::endl;
-		std::cout << "vector: ";
-		for (auto i : vec)
-			std::cout << i << " ";
-		std::cout << std::endl;
-	}
+	for (const auto& i : vec_)
+		printf("%d, ", i);
+
+	printf("\n");
+  }
+
+ private:
+  friend class LiMir;
+
+  std::vector<int> vec_ = { 1, 2, 3, 4, 5 };
+  int a_ = 5;
+  int* aptr_ = &a_;
 };
 
-class C : public virtual A
-{
-public:
-	B b;
-	B& bref = b;
-	C* cptr = this;
+class C : public virtual A {
+ public:
+  template<class T>
+  void Master(T* obj) {
+	MASTER_BASE_OBJ(A);
+	MASTER_OBJ(b_);
+	MASTER_OBJ_REF(bref_);
+	MASTER_OBJ_PTR(cptr_);
+  }
 
-	friend class LiMir;
-	template<class T>
-	void master(T* t_obj)
-	{
-		MASTER_BASE_OBJ(A);
-		MASTER_OBJ(b);
-		MASTER_OBJ_REF(bref);
-		MASTER_OBJ_PTR(cptr);
-	}
+ private:
+  friend class LiMir;
+  B b_;
+  B& bref_ = b_;
+  C* cptr_ = this;
 };
 
-class D : public B, public C
-{
-public:
-	int y = 3;
-	double pi = 3.14;
+class D : public B, public C {
+ public:
+  template<class T>
+  void Master(T* obj) {
+	MASTER_BASE_OBJ(B);
+	MASTER_BASE_OBJ(C);
+	MASTER(y_);
+	MASTER(pi_);
+  }
 
-	friend class LiMir;
-	template<class T>
-	void master(T* t_obj)
-	{
-		MASTER_BASE_OBJ(B);
-		MASTER_BASE_OBJ(C);
-		MASTER(y);
-		MASTER(pi);
-	}
+  void ClearFields() override {
+	y_ = 0;
+	pi_ = 0;
+  }
 
-	void clearFields() override
-	{
-		y = 0;
-		pi = 0;
-	}
+  void Print() override {
+	printf("y: %d \n", y_);
+	printf("pi: %lf \n", pi_);
+  }
 
-	void print() override
-	{
-		std::cout << "y: " << y << std::endl;
-		std::cout << "pi: " << pi << std::endl;
-	}
+ private:
+  friend class LiMir;
+  int y_ = 3;
+  double pi_ = 3.14;
 };
 
-void test1()
-{
-	std::cout << "========= TEST1 =========\n";
-	LiMir object("test1.xml");
-	A a;
-	object.serialize(a, NAME_OBJECT(a));
-	a.clearFields();
-	object.deserialize(a);
-	a.print();
-	std::cout << "========= ===== =========\n\n";
+void test1() {
+  printf("========= TEST1 =========\n");
+  LiMir object("test1.xml");
+  A a;
+  object.Serialize(a, NAME_OBJECT(a));
+  a.ClearFields();
+  object.Deserialize(a);
+  a.Print();
+  printf("========= ===== =========\n\n");
 }
 
-void test2()
-{
-	std::cout << "========= TEST2 =========\n";
-	LiMir object("test2.xml");
-	B b;
-	object.serialize(b, NAME_OBJECT(b));
-	b.clearFields();
-	object.deserialize(b);
-	b.print();
-	std::cout << "========= ===== =========\n\n";
+void test2() {
+  printf("========= TEST2 =========\n");
+  LiMir object("test2.xml");
+  B b;
+  object.Serialize(b, NAME_OBJECT(b));
+  b.ClearFields();
+  object.Deserialize(b);
+  b.Print();
+  printf("========= ===== =========\n\n");
 }
 
-void test3()
-{
-	std::cout << "========= TEST3 =========\n";
-	LiMir object("test3.xml");
-	D d;
-	object.serialize(d, NAME_OBJECT(d));
-	d.clearFields();
-	object.deserialize(d);
-	d.print();
-	std::cout << "========= ===== =========\n\n";
+void test3() {
+  printf("========= TEST3 =========\n");
+  LiMir object("test3.xml");
+  D d;
+  object.Serialize(d, NAME_OBJECT(d));
+  d.ClearFields();
+  object.Deserialize(d);
+  d.Print();
+  printf("========= ===== =========\n\n");
 }
 
-int main()
-{
-	test1();
-	test2();
-	test3();
-	std::cin.get();
+int main() {
+  test1();
+  test2();
+  test3();
+  system("pause");
 }

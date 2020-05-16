@@ -1,4 +1,6 @@
-#pragma once
+#ifndef LIMIR_SRC_LIMIR_H_
+#define LIMIR_SRC_LIMIR_H_
+
 #include <iostream>
 #include <vector>
 #include <stack>
@@ -8,226 +10,202 @@
 #include "../tinyXML/tinyxml2.h"
 
 #define NAME_OBJECT(x) (#x)
-#define MASTER(x) t_obj->masterField((x), #x)
-#define MASTER_OBJ(x) t_obj->masterObject((x), #x)
-#define MASTER_OBJ_PTR(x) t_obj->masterObjectPointer((x), #x)
-#define MASTER_OBJ_REF(x) t_obj->masterObjectReference((x), #x)
-#define MASTER_INT_PTR(x) t_obj->masterIntPointer((x), #x)
-#define MASTER_BASE_OBJ(x) t_obj->masterBaseObject((dynamic_cast<x *>(this)), #x)
+#define MASTER(x) obj->MasterField((x), #x)
+#define MASTER_OBJ(x) obj->MasterObject((x), #x)
+#define MASTER_OBJ_PTR(x) obj->MasterObjectPointer((x), #x)
+#define MASTER_OBJ_REF(x) obj->MasterObjectReference((x), #x)
+#define MASTER_INT_PTR(x) obj->MasterIntPointer((x), #x)
+#define MASTER_BASE_OBJ(x) obj->MasterBaseObject((dynamic_cast<x *>(this)), #x)
 
 #define XMLCheckResult(a_eResult) if (a_eResult != XML_SUCCESS) { printf("Error: %i\n", a_eResult);}
 
 using namespace tinyxml2;
 
-struct classInformation
-{
-	std::string className;
-	int uniqID;
+struct ClassInformation {
+  std::string class_name;
+  int uniq_id;
 };
 
-class LiMir 
-{
-private:
-	XMLDocument doc;
-	const char* filename;
-	const char* objectName;
-	const int SAVE_MODE = 0;
-	const int LOAD_MODE = 1;
-	int liMirMode = 0;
+class LiMir {
+ public:
+  LiMir() {}
+  explicit LiMir(const char* filename) : filename_(filename) {}
+  ~LiMir() {}
 
-	std::vector<classInformation> classList;
-	std::vector<const char*> classNames;
-	std::vector<XMLElement*> parents;
+  template<class T>
+  void Serialize(T& object, const char* name) {
+    AddToClassList(typeid(object).name());
+	object_name_ = name;
+	limir_mode_ = kSaveMode;
+	CreateNewFile();
+	OpenFile();
+	object.Master(this);
+	SaveFile();
+  }
 
-	int findClassInList(const char* name);
-	int addToClassList(const char* name);
+  template<class T>
+  void Deserialize(T& object) {
+    limir_mode_ = kLoadMode;
+	OpenFile();
+	object.Master(this);
+	SaveFile();
+  }
 
-	void createNewFile();
-	void openFile();
-	void saveFile();
+  template<class T>
+  void MasterField(T& x, const char* name) {
+	if (limir_mode_ == kSaveMode)
+	  SaveField(x, name);
+	else
+	  LoadField(x, name);
+  }
 
-	void saveField(int& x, const char* name);
-	void saveField(double& x, const char* name);
-	void saveField(float& x, const char* name);
-	void saveField(std::vector<int>& v, const char* name);
-	void savePointer(int*& x, const char* name);
-	void loadField(int& x, const char* name);
-	void loadField(double& x, const char* name);
-	void loadField(float& x, const char* name);
-	void loadField(std::vector<int>& v, const char* name);
-	void loadPointer(int*& x, const char* name);
+  template<class T>
+  void MasterObject(T& object, const char* name) {
+	if (limir_mode_ == kSaveMode)
+	  SaveObject(object, name);
+  }
 
-	XMLElement* findByName(const char* name);
+  template<class T>
+  void MasterObjectPointer(T*& object_ptr, const char* name) {
+    if (object_ptr == nullptr)
+	  return;
 
-	template<class T>
-	void saveObject(T& object, const char* name)
-	{
-		int ID = findClassInList(typeid(object).name());
-		if (ID == -1)
-		{
-			ID = addToClassList(typeid(object).name());
-		}
-		XMLElement* pElement = doc.NewElement(name);
-		pElement->SetAttribute("class_object", 0);
-		pElement->SetAttribute("class_id", ID);
+	if (limir_mode_ == kSaveMode)
+	  SaveObjectPointer(object_ptr, name);
+  }
 
-		if (!parents.empty())
-		{
-			parents.back()->InsertEndChild(pElement);
-		}
-		else
-		{
-			XMLNode* pRoot = doc.FirstChild();
-			pRoot->InsertEndChild(pElement);
-		}
+  template <class T>
+  void MasterObjectReference(T& object_ref, const char* name) {
+	if (limir_mode_ == kSaveMode)
+      SaveObjectReference(object_ref, name);
+  }
+
+  template<class T>
+  void MasterBaseObject(T* base_object, const char* name) {
+	if (base_object == nullptr)
+	  return;
+
+	if (limir_mode_ == kSaveMode)
+	  SaveBaseObject(base_object, name);
+	else
+	  LoadBaseObject(base_object, name);
+  }
+
+  void MasterIntPointer(int*& x, const char* name);
+	
+ private:
+  int FindClassInList(const char* name);
+  int AddToClassList(const char* name);
+  void CreateNewFile();
+  void OpenFile();
+  void SaveFile();
+  void SaveField(const int x, const char* name);
+  void SaveField(const double x, const char* name);
+  void SaveField(const float x, const char* name);
+  void SaveField(const std::vector<int>& v, const char* name);
+  void SavePointer(int*& x, const char* name);
+  void LoadField(int& x, const char* name);
+  void LoadField(double& x, const char* name);
+  void LoadField(float& x, const char* name);
+  void LoadField(std::vector<int>& v, const char* name);
+  void LoadPointer(int*& x, const char* name);
+
+  XMLElement* FindByName(const char* name);
+
+  template<class T>
+  void SaveObject(T& object, const char* name) {
+    int id = FindClassInList(typeid(object).name());
+
+	if (id == -1) {
+      id = AddToClassList(typeid(object).name());
+    }
+
+	XMLElement* pElement = doc_.NewElement(name);
+	pElement->SetAttribute("class_object", 0);
+	pElement->SetAttribute("class_id", id);
+
+	if (!parents_.empty()) {
+	  parents_.back()->InsertEndChild(pElement);
+	} else {
+	  XMLNode* pRoot = doc_.FirstChild();
+	  pRoot->InsertEndChild(pElement);
+	}
+  }
+
+  template<class T>
+  void SaveObjectReference(T& object_ref, const char* name) {
+    int id = FindClassInList(typeid(object_ref).name());
+
+	if (id == -1) {
+	  id = AddToClassList(typeid(object_ref).name());
 	}
 
+	XMLElement* pElement = doc_.NewElement(name);
+	pElement->SetAttribute("class_object_reference", 0);
+	pElement->SetAttribute("class_id", id);
 
-	template<class T>
-	void saveObjectReference(T& objectRef, const char* name)
-	{
-		int ID = findClassInList(typeid(objectRef).name());
-		if (ID == -1)
-		{
-			ID = addToClassList(typeid(objectRef).name());
-		}
-		XMLElement* pElement = doc.NewElement(name);
-		pElement->SetAttribute("class_object_reference", 0);
-		pElement->SetAttribute("class_id", ID);
+	if (!parents_.empty()) {
+      parents_.back()->InsertEndChild(pElement); 
+	} else {
+      XMLNode* pRoot = doc_.FirstChild();
+      pRoot->InsertEndChild(pElement);
+	}
+  }
 
-		if (!parents.empty())
-		{
-			parents.back()->InsertEndChild(pElement);
-		}
-		else
-		{
-			XMLNode* pRoot = doc.FirstChild();
-			pRoot->InsertEndChild(pElement);
-		}
+  template<class T>
+  void SaveObjectPointer(T*& object_ptr, const char* name) {
+    int id = FindClassInList(typeid(object_ptr).name());
+
+	if (id == -1) {
+	  id = AddToClassList(typeid(object_ptr).name());
 	}
 
-	template<class T>
-	void saveObjectPointer(T*& objectPtr, const char* name)
-	{
-		int ID = findClassInList(typeid(objectPtr).name());
-		if (ID == -1)
-		{
-			ID = addToClassList(typeid(objectPtr).name());
-		}
-		XMLElement* pElement = doc.NewElement(name);
-		pElement->SetAttribute("class_object_pointer", 0);
-		pElement->SetAttribute("class_id", ID);
+	XMLElement* pElement = doc_.NewElement(name);
+	pElement->SetAttribute("class_object_pointer", 0);
+	pElement->SetAttribute("class_id", id);
 
-		if (!parents.empty())
-		{
-			parents.back()->InsertEndChild(pElement);
-		}
-		else
-		{
-			XMLNode* pRoot = doc.FirstChild();
-			pRoot->InsertEndChild(pElement);
-		}
+	if (!parents_.empty()) {
+	  parents_.back()->InsertEndChild(pElement);
+	} else {
+	  XMLNode* pRoot = doc_.FirstChild(); 
+	  pRoot->InsertEndChild(pElement);
+	}
+  }
+
+  template<class T>
+  void SaveBaseObject(T* base_object, const char* name) {
+    int id = FindClassInList(typeid(base_object).name());
+
+	if (id == -1) {
+	  id = AddToClassList(typeid(base_object).name());
+	}
+		
+	XMLNode* pRoot = doc_.FirstChild();
+	XMLElement* pElement = doc_.NewElement(name);
+	pElement->SetAttribute("class_id", id);
+
+	parents_.push_back(pElement);
+	base_object->Master(this);
+	parents_.pop_back();
+	pRoot->InsertEndChild(pElement);
 	}
 
-	template<class T>
-	void saveBaseObject(T* baseObject, const char* name)
-	{
-		int ID = findClassInList(typeid(baseObject).name());
-		if (ID == -1)
-		{
-			ID = addToClassList(typeid(baseObject).name());
-		}
-		XMLNode* pRoot = doc.FirstChild();
+  template<class T>
+  void LoadBaseObject(T* base_object, const char* name) {
+    class_names_.push_back(name);
+	base_object->Master(this);
+	class_names_.pop_back();
+  }
 
-		XMLElement* pElement = doc.NewElement(name);
-		pElement->SetAttribute("class_id", ID);
-
-		parents.push_back(pElement);
-		baseObject->master(this);
-		parents.pop_back();
-
-		pRoot->InsertEndChild(pElement);
-	}
-
-	template<class T>
-	void loadBaseObject(T* baseObject, const char* name)
-	{
-		classNames.push_back(name);
-		baseObject->master(this);
-		classNames.pop_back();
-	}
-
-public:
-	LiMir() = delete;
-
-	LiMir(const char* t_filename) : filename(t_filename) {}
-
-	template<class T>
-	void serialize(T& object, const char* name)
-	{
-		addToClassList(typeid(object).name());
-		objectName = name;
-		liMirMode = SAVE_MODE;
-		createNewFile();
-		openFile();
-		object.master(this);
-		saveFile();
-	}
-
-	template<class T>
-	void deserialize(T& object)
-	{
-		liMirMode = LOAD_MODE;
-		openFile();
-		object.master(this);
-		saveFile();
-	}
-
-	template<class T>
-	void masterField(T& x, const char* name)
-	{
-		if (liMirMode == SAVE_MODE)
-			saveField(x, name);
-		else
-			loadField(x, name);
-	}
-
-	template<class T>
-	void masterObject(T& object, const char* name)
-	{
-		if (liMirMode == SAVE_MODE)
-			saveObject(object, name);
-	}
-
-	template<class T>
-	void masterObjectPointer(T*& objectPtr, const char* name)
-	{
-		if (objectPtr == nullptr)
-			return;
-
-		if (liMirMode == SAVE_MODE)
-			saveObjectPointer(objectPtr, name);
-	}
-
-	template <class T>
-	void masterObjectReference(T& objectRef, const char* name)
-	{
-		if (liMirMode == SAVE_MODE)
-			saveObjectReference(objectRef, name);
-	}
-
-	template<class T>
-	void masterBaseObject(T* baseObject, const char* name)
-	{
-		if (baseObject == nullptr)
-			return;
-
-		if (liMirMode == SAVE_MODE)
-			saveBaseObject(baseObject, name);
-		else
-			loadBaseObject(baseObject, name);
-	}
-
-	void masterIntPointer(int*& x, const char* name);
-	~LiMir() = default;
+	XMLDocument doc_;
+	const char* filename_;
+	const char* object_name_;
+	const int kSaveMode = 0;
+	const int kLoadMode = 1;
+	int limir_mode_ = 0;
+	std::vector<ClassInformation> class_list_;
+	std::vector<const char*> class_names_;
+	std::vector<XMLElement*> parents_;
 };
+
+#endif // LIMIR_SRC_LIMIR_H_
