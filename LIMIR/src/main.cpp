@@ -9,11 +9,11 @@ class A {
   }
 
   virtual void ClearFields() {
-	x_ = 0;
+    x_ = 0;
   }
 
   virtual void Print() {
-	std::cout << "x: " << x_ << std::endl;
+    printf("x_: %d \n", x_);
   }
 
 private:
@@ -25,26 +25,26 @@ class B : public virtual A {
  public:
   template<class T>
   void Master(T* obj) {
-	MASTER_BASE_OBJ(A);
-	MASTER(vec_);
-	MASTER(a_);
-	MASTER_INT_PTR(aptr_);
+    MASTER_BASE_OBJ(A);
+    MASTER(vec_);
+    MASTER(a_);
+    MASTER_INT_PTR(aptr_);
   }
 
   void ClearFields() override {
-	a_ = 0;
-	vec_.clear();
+    a_ = 0;
+    vec_.clear();
   }
 
   void Print() override {
     printf("a: %d \n", a_);
-	printf("*aptr: %d \n", *aptr_);
-	printf("vector: \n");
+    printf("*aptr: %d \n", *aptr_);
+    printf("vector: \n");
 
-	for (const auto& i : vec_)
-		printf("%d, ", i);
+    for (const auto& i : vec_)
+      printf("%d, ", i);
 
-	printf("\n");
+    printf("\n");
   }
 
  private:
@@ -59,10 +59,10 @@ class C : public virtual A {
  public:
   template<class T>
   void Master(T* obj) {
-	MASTER_BASE_OBJ(A);
-	MASTER_OBJ(b_);
-	MASTER_OBJ_REF(bref_);
-	MASTER_OBJ_PTR(cptr_);
+    MASTER_BASE_OBJ(A);
+    MASTER_OBJ(b_);
+    MASTER_OBJ_REF(bref_);
+    MASTER_OBJ_PTR(cptr_);
   }
 
  private:
@@ -76,20 +76,20 @@ class D : public B, public C {
  public:
   template<class T>
   void Master(T* obj) {
-	MASTER_BASE_OBJ(B);
-	MASTER_BASE_OBJ(C);
-	MASTER(y_);
-	MASTER(pi_);
+    MASTER_BASE_OBJ(B);
+    MASTER_BASE_OBJ(C);
+    MASTER(y_);
+    MASTER(pi_);
   }
 
   void ClearFields() override {
-	y_ = 0;
-	pi_ = 0;
+    y_ = 0;
+    pi_ = 0;
   }
 
   void Print() override {
-	printf("y: %d \n", y_);
-	printf("pi: %lf \n", pi_);
+    printf("y: %d \n", y_);
+    printf("pi: %lf \n", pi_);
   }
 
  private:

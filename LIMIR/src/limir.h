@@ -35,64 +35,64 @@ class LiMir {
   template<class T>
   void Serialize(T& object, const char* name) {
     AddToClassList(typeid(object).name());
-	object_name_ = name;
-	limir_mode_ = kSaveMode;
-	CreateNewFile();
-	OpenFile();
-	object.Master(this);
-	SaveFile();
+    object_name_ = name;
+    limir_mode_ = kSaveMode;
+    CreateNewFile();
+    OpenFile();
+    object.Master(this);
+    SaveFile();
   }
 
   template<class T>
   void Deserialize(T& object) {
     limir_mode_ = kLoadMode;
-	OpenFile();
-	object.Master(this);
-	SaveFile();
+    OpenFile();
+    object.Master(this);
+    SaveFile();
   }
 
   template<class T>
   void MasterField(T& x, const char* name) {
-	if (limir_mode_ == kSaveMode)
-	  SaveField(x, name);
-	else
-	  LoadField(x, name);
+    if (limir_mode_ == kSaveMode)
+      SaveField(x, name);
+    else
+      LoadField(x, name);
   }
 
   template<class T>
   void MasterObject(T& object, const char* name) {
-	if (limir_mode_ == kSaveMode)
-	  SaveObject(object, name);
+    if (limir_mode_ == kSaveMode)
+      SaveObject(object, name);
   }
 
   template<class T>
   void MasterObjectPointer(T*& object_ptr, const char* name) {
     if (object_ptr == nullptr)
-	  return;
+      return;
 
-	if (limir_mode_ == kSaveMode)
-	  SaveObjectPointer(object_ptr, name);
+    if (limir_mode_ == kSaveMode)
+      SaveObjectPointer(object_ptr, name);
   }
 
   template <class T>
   void MasterObjectReference(T& object_ref, const char* name) {
-	if (limir_mode_ == kSaveMode)
+    if (limir_mode_ == kSaveMode)
       SaveObjectReference(object_ref, name);
   }
 
   template<class T>
   void MasterBaseObject(T* base_object, const char* name) {
-	if (base_object == nullptr)
-	  return;
+    if (base_object == nullptr)
+      return;
 
-	if (limir_mode_ == kSaveMode)
-	  SaveBaseObject(base_object, name);
-	else
-	  LoadBaseObject(base_object, name);
+    if (limir_mode_ == kSaveMode)
+      SaveBaseObject(base_object, name);
+    else
+      LoadBaseObject(base_object, name);
   }
 
   void MasterIntPointer(int*& x, const char* name);
-	
+    
  private:
   int FindClassInList(const char* name);
   int AddToClassList(const char* name);
@@ -116,40 +116,40 @@ class LiMir {
   void SaveObject(T& object, const char* name) {
     int id = FindClassInList(typeid(object).name());
 
-	if (id == -1) {
+    if (id == -1) {
       id = AddToClassList(typeid(object).name());
     }
 
-	XMLElement* pElement = doc_.NewElement(name);
-	pElement->SetAttribute("class_object", 0);
-	pElement->SetAttribute("class_id", id);
+    XMLElement* pElement = doc_.NewElement(name);
+    pElement->SetAttribute("class_object", 0);
+    pElement->SetAttribute("class_id", id);
 
-	if (!parents_.empty()) {
-	  parents_.back()->InsertEndChild(pElement);
-	} else {
-	  XMLNode* pRoot = doc_.FirstChild();
-	  pRoot->InsertEndChild(pElement);
-	}
+    if (!parents_.empty()) {
+      parents_.back()->InsertEndChild(pElement);
+    } else {
+      XMLNode* pRoot = doc_.FirstChild();
+      pRoot->InsertEndChild(pElement);
+    }
   }
 
   template<class T>
   void SaveObjectReference(T& object_ref, const char* name) {
     int id = FindClassInList(typeid(object_ref).name());
 
-	if (id == -1) {
-	  id = AddToClassList(typeid(object_ref).name());
-	}
+    if (id == -1) {
+      id = AddToClassList(typeid(object_ref).name());
+    }
 
-	XMLElement* pElement = doc_.NewElement(name);
-	pElement->SetAttribute("class_object_reference", 0);
-	pElement->SetAttribute("class_id", id);
+    XMLElement* pElement = doc_.NewElement(name);
+    pElement->SetAttribute("class_object_reference", 0);
+    pElement->SetAttribute("class_id", id);
 
-	if (!parents_.empty()) {
+    if (!parents_.empty()) {
       parents_.back()->InsertEndChild(pElement); 
-	} else {
+    } else {
       XMLNode* pRoot = doc_.FirstChild();
       pRoot->InsertEndChild(pElement);
-	}
+    }
   }
 
   template<class T>
@@ -179,7 +179,7 @@ class LiMir {
     if (id == -1) {
       id = AddToClassList(typeid(base_object).name());
     }
-		
+        
     XMLNode* pRoot = doc_.FirstChild();
     XMLElement* pElement = doc_.NewElement(name);
     pElement->SetAttribute("class_id", id);
