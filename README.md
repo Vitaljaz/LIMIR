@@ -1,7 +1,9 @@
 ## LIMIR
 
 LiMir - библиотека для работы с XML репозиторием классов C++. 
+
 XML-файл создается и редактируется с помощью библиотеки TinyXML2.
+
 Ссылка на TinyXML2: http://www.grinninglizard.com/tinyxml2/ 
 
 Как использовать:
