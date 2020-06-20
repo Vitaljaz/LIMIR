@@ -24,12 +24,18 @@
     <ClCompile Include="src\limir.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\test.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tinyXML\tinyxml2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\limir.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

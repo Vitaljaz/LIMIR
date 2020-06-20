@@ -6,6 +6,7 @@
 #include <stack>
 #include <string>
 #include <typeinfo>
+#include <type_traits>
 
 #include "../tinyXML/tinyxml2.h"
 
@@ -99,26 +100,35 @@ class LiMir {
   void CreateNewFile();
   void OpenFile();
   void SaveFile();
-  void SaveField(const int x, const char* name);
-  void SaveField(const double x, const char* name);
-  void SaveField(const float x, const char* name);
   void SaveField(const std::vector<int>& v, const char* name);
   void SavePointer(int*& x, const char* name);
   void LoadField(int& x, const char* name);
-  void LoadField(double& x, const char* name);
-  void LoadField(float& x, const char* name);
+	void LoadField(double& x, const char* name);
+	void LoadField(float& x, const char* name);
   void LoadField(std::vector<int>& v, const char* name);
   void LoadPointer(int*& x, const char* name);
 
   XMLElement* FindByName(const char* name);
 
+	template<class T>
+	void SaveField(const T& x, const char* name) {
+		XMLElement* pElement = doc_.NewElement(name);
+		pElement->SetText(x);
+
+		if (!parents_.empty()) {
+			parents_.back()->InsertEndChild(pElement);
+		} else {
+			XMLNode* pRoot = doc_.LastChild()->FirstChild();
+			pRoot->InsertEndChild(pElement);
+		}
+	}
+
   template<class T>
   void SaveObject(T& object, const char* name) {
     int id = FindClassInList(typeid(object).name());
 
-    if (id == -1) {
+    if (id == -1)
       id = AddToClassList(typeid(object).name());
-    }
 
     XMLElement* pElement = doc_.NewElement(name);
     pElement->SetAttribute("class_object", 0);
@@ -127,7 +137,7 @@ class LiMir {
     if (!parents_.empty()) {
       parents_.back()->InsertEndChild(pElement);
     } else {
-      XMLNode* pRoot = doc_.FirstChild();
+			XMLNode* pRoot = doc_.LastChild()->FirstChild();
       pRoot->InsertEndChild(pElement);
     }
   }
@@ -136,9 +146,8 @@ class LiMir {
   void SaveObjectReference(T& object_ref, const char* name) {
     int id = FindClassInList(typeid(object_ref).name());
 
-    if (id == -1) {
+    if (id == -1)
       id = AddToClassList(typeid(object_ref).name());
-    }
 
     XMLElement* pElement = doc_.NewElement(name);
     pElement->SetAttribute("class_object_reference", 0);
@@ -147,7 +156,7 @@ class LiMir {
     if (!parents_.empty()) {
       parents_.back()->InsertEndChild(pElement); 
     } else {
-      XMLNode* pRoot = doc_.FirstChild();
+			XMLNode* pRoot = doc_.LastChild()->FirstChild();
       pRoot->InsertEndChild(pElement);
     }
   }
@@ -156,9 +165,8 @@ class LiMir {
   void SaveObjectPointer(T*& object_ptr, const char* name) {
     int id = FindClassInList(typeid(object_ptr).name());
 
-    if (id == -1) {
+    if (id == -1)
       id = AddToClassList(typeid(object_ptr).name());
-    }
 
     XMLElement* pElement = doc_.NewElement(name);
     pElement->SetAttribute("class_object_pointer", 0);
@@ -167,8 +175,8 @@ class LiMir {
     if (!parents_.empty()) {
       parents_.back()->InsertEndChild(pElement);
     } else {
-    XMLNode* pRoot = doc_.FirstChild();
-    pRoot->InsertEndChild(pElement);
+			XMLNode* pRoot = doc_.LastChild()->FirstChild();
+			pRoot->InsertEndChild(pElement);
     }
   }
 
@@ -176,11 +184,12 @@ class LiMir {
   void SaveBaseObject(T* base_object, const char* name) {
     int id = FindClassInList(typeid(base_object).name());
 
-    if (id == -1) {
-      id = AddToClassList(typeid(base_object).name());
-    }
-        
-    XMLNode* pRoot = doc_.FirstChild();
+		if (id == -1)
+			id = AddToClassList(typeid(base_object).name());
+		else
+			return;
+
+		XMLNode* pRoot = doc_.LastChild()->FirstChild();
     XMLElement* pElement = doc_.NewElement(name);
     pElement->SetAttribute("class_id", id);
 

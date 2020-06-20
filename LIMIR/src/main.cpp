@@ -1,7 +1,10 @@
 #include <iostream>
 #include "limir.h"
+#include "test.h"
 
-class A {
+// Base class
+// Serialization fields: int
+class Base {
  public:
   template<class T>
   void Master(T* obj) {
@@ -13,7 +16,7 @@ class A {
   }
 
   virtual void Print() {
-    printf("x_: %d \n", x_);
+    printf("x: %d \n", x_);
   }
 
 private:
@@ -21,11 +24,13 @@ private:
   int x_ = 10;
 };
 
-class B : public virtual A {
+// Child1 class with virtual inheritance
+// Serialization fields: vector, int, pointer to int
+class Child1 : public virtual Base {
  public:
   template<class T>
   void Master(T* obj) {
-    MASTER_BASE_OBJ(A);
+    MASTER_BASE_OBJ(Base);
     MASTER(vec_);
     MASTER(a_);
     MASTER_INT_PTR(aptr_);
@@ -55,11 +60,13 @@ class B : public virtual A {
   int* aptr_ = &a_;
 };
 
-class C : public virtual A {
+// Child2 class with virtual inheritance
+// Serialization fields: Child1 object, Child1 object reference, pointer to Child2 object
+class Child2 : public virtual Base {
  public:
   template<class T>
   void Master(T* obj) {
-    MASTER_BASE_OBJ(A);
+    MASTER_BASE_OBJ(Base);
     MASTER_OBJ(b_);
     MASTER_OBJ_REF(bref_);
     MASTER_OBJ_PTR(cptr_);
@@ -67,17 +74,19 @@ class C : public virtual A {
 
  private:
   friend class LiMir;
-  B b_;
-  B& bref_ = b_;
-  C* cptr_ = this;
+  Child1 b_;
+  Child1& bref_ = b_;
+  Child2* cptr_ = this;
 };
 
-class D : public B, public C {
+// Child3 class with multiple inheritance
+// Serialization fields: int, double
+class Child3 : public Child1, public Child2 {
  public:
   template<class T>
   void Master(T* obj) {
-    MASTER_BASE_OBJ(B);
-    MASTER_BASE_OBJ(C);
+    MASTER_BASE_OBJ(Child1);
+    MASTER_BASE_OBJ(Child2);
     MASTER(y_);
     MASTER(pi_);
   }
@@ -100,34 +109,28 @@ class D : public B, public C {
 
 void test1() {
   printf("========= TEST1 =========\n");
-  LiMir object("test1.xml");
-  A a;
-  object.Serialize(a, NAME_OBJECT(a));
-  a.ClearFields();
-  object.Deserialize(a);
-  a.Print();
+	Test test("test1.xml");
+	Base base;
+	test.Run(base, NAME_OBJECT(base));
+	base.Print();
   printf("========= ===== =========\n\n");
 }
 
 void test2() {
   printf("========= TEST2 =========\n");
-  LiMir object("test2.xml");
-  B b;
-  object.Serialize(b, NAME_OBJECT(b));
-  b.ClearFields();
-  object.Deserialize(b);
-  b.Print();
+	Test test("test2.xml");
+	Child1 child1;
+	test.Run(child1, NAME_OBJECT(child1));
+	child1.Print();
   printf("========= ===== =========\n\n");
 }
 
 void test3() {
   printf("========= TEST3 =========\n");
-  LiMir object("test3.xml");
-  D d;
-  object.Serialize(d, NAME_OBJECT(d));
-  d.ClearFields();
-  object.Deserialize(d);
-  d.Print();
+	Test test("test3.xml");
+	Child3 child3;
+	test.Run(child3, NAME_OBJECT(child3));
+	child3.Print();
   printf("========= ===== =========\n\n");
 }
 

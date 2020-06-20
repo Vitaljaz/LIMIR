@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LiMir>
+    <child1 class_id="0">
+        <Base class_id="1">
+            <x_>10</x_>
+        </Base>
+        <vec_ itemCount="5">
+            <Item>1</Item>
+            <Item>2</Item>
+            <Item>3</Item>
+            <Item>4</Item>
+            <Item>5</Item>
+        </vec_>
+        <a_>5</a_>
+        <aptr_>5</aptr_>
+    </child1>
+</LiMir>

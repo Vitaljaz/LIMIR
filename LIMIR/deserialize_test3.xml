@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LiMir>
+    <child3 class_id="0">
+        <Base class_id="2">
+            <x_>10</x_>
+        </Base>
+        <Child1 class_id="1">
+            <vec_ itemCount="5">
+                <Item>1</Item>
+                <Item>2</Item>
+                <Item>3</Item>
+                <Item>4</Item>
+                <Item>5</Item>
+            </vec_>
+            <a_>5</a_>
+            <aptr_>5</aptr_>
+        </Child1>
+        <Child2 class_id="3">
+            <b_ class_object="0" class_id="4"/>
+            <bref_ class_object_reference="0" class_id="4"/>
+            <cptr_ class_object_pointer="0" class_id="3"/>
+        </Child2>
+        <y_>3</y_>
+        <pi_>3.1400000000000001</pi_>
+    </child3>
+</LiMir>
