@@ -7,16 +7,15 @@ LIMIR - библиотека для работы с XML репозиторием
 ```
 	friend class LiMir;
 	template<class T>
-	void master(T* t_obj)
-	{
-		MASTER(x);
+	void master(T* obj) {
+	  MASTER(x);
 	}
 ```
 Доступные методы:
 
 ```
-void serialize(T& object, const char* name); 
-void deserialize(T& object);
+void Serialize(T& object, const char* name); 
+void Deserialize(T& object);
 ```
 
 **Обязательно** соблюдать название метода и макросов. 
@@ -35,25 +34,21 @@ NAME_OBJECT(x)     - используется для получения имен
 Пример использования:
 
 ```
-class A
-{
-public:
-	int x = 10;
+class A {
+ public:
+  int x_ = 10;
 	
-	friend class LiMir;
-	template<class T>
-	void master(T* t_obj)
-	{
-		MASTER(x);
-	}
+  friend class LiMir;
+  template<class T>
+  void master(T* obj) {
+    MASTER(x);
+  }
 };
 
-int main()
-{
-
-	LiMir object("output.xml");
-	A a;
-	object.serialize(a, NAME_OBJECT(a));
-	object.deserialize(a);
+int main() {
+  LiMir object("output.xml");
+  A a;
+  object.Serialize(a, NAME_OBJECT(a));
+  object.Deserialize(a);
 }
 ```
